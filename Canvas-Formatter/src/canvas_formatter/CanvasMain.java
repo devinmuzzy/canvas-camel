@@ -2,16 +2,22 @@ package canvas_formatter;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FileReader;
 import java.util.*;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONObject;
 import canvas_formatter.DataGrabber.courseObj;
-import canvas_formatter.DataGrabber.gradeObj;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 public class CanvasMain {
+
+	static Thread idkBruv;
+	static JFrame progressFrame;
+	static JProgressBar progressBar;
+	static String[] loadedStudentList;
 
 	final static String SUFFIX = "?access_token=";
 	static DataGrabber response;
@@ -103,14 +109,6 @@ public class CanvasMain {
 		}
 	}
 
-	public static Object[][] getDoubleArray(String tokenString) {
-		return null;
-	}
-
-	public static Object[] getTableHeaders(String tokenString) {
-		return null;
-	}
-
 	public static String[] getKeys(String course_ID) {
 		// DataGrabber response = new DataGrabber(MOM_PREFIX, SUFFIX, MOM_TOKEN);
 		String[] keyArray;
@@ -159,60 +157,7 @@ public class CanvasMain {
 		return keyArray;
 	}
 
-	public static String[] testGetKeys() {
 
-		// DataGrabber response = new DataGrabber(MOM_PREFIX, SUFFIX, MOM_TOKEN);
-		String[] keyArray;
-
-		// String course_ID = "9537";
-
-		HashMap<String, String> logins = new HashMap<String, String>();
-
-		// response.fillLoginMap(logins, course_ID);
-
-		Set<String> keySet = logins.keySet();
-
-		keyArray = new String[keySet.size()];
-
-		int i = 0;
-		for (String s : keySet) {
-			keyArray[i] = s;
-			i++;
-		}
-
-		return keyArray;
-
-	}
-
-	public static String[][] testGetValues() {
-
-		// DataGrabber response = new DataGrabber(MOM_PREFIX, SUFFIX, MOM_TOKEN);
-		String[][] keyArray;
-
-		// String course_ID = "9537";
-
-		HashMap<String, String> logins = new HashMap<String, String>();
-
-		// response.fillLoginMap(logins, course_ID);
-
-		Set<String> keySet = logins.keySet();
-
-		keyArray = new String[keySet.size()][keySet.size()];
-
-		int i = 0;
-		for (String s : keySet) {
-			keyArray[i][1] = logins.get(s);
-			i++;
-		}
-
-		int j = 0;
-		for (String s : keySet) {
-			keyArray[j][0] = s;
-			j++;
-		}
-
-		return keyArray;
-	}
 
 	public static Object[][] getActivityTableArray(List<String> classList, List<String> students) {
 
@@ -230,16 +175,15 @@ public class CanvasMain {
 					}
 				}
 			}
-			// FIXME
+			
+		
 			// for(String k: chosenIDs) {
 			// system.out.println("ID: " + k + " was chosen");
 			// }
 
 			String[] chosenIDsArray = chosenIDs.toArray(new String[0]);
 
-			Map<String, List<courseObj>> activitiesMap = response.getActivitiesMap(chosenIDsArray); // FIXME probably
-																									// the issue
-
+			Map<String, List<DataHolder>> activitiesMap = response.getActivitiesMap(chosenIDsArray);
 			Object[][] table;
 
 			table = new Object[students.size() + 1][classList.size() + 1];
@@ -257,32 +201,32 @@ public class CanvasMain {
 			}
 
 			String currentCourse, student;
-			List<courseObj> studentCourses;
+			List<DataHolder> studentCourses;
 
 			for (int i = 1; i < students.size(); i++) {
 				student = students.get(i);
-				studentCourses = activitiesMap.get(student); // FIXME issue?
+				studentCourses = activitiesMap.get(student); 
 				if (studentCourses == null) {
 					continue;
 				}
 
-				for (int j = 1; j < classList.size(); j++) {
-					currentCourse = chosenIDs.get(j - 1);
-					for (courseObj c : studentCourses) {
+				for (int j = 0; j < classList.size(); j++) {
+					currentCourse = chosenIDs.get(j);
+					for (DataHolder c : studentCourses) {
 						if (c == null) {
-							table[i][j] = "no known grade" + i + j;
+							table[i][j + 1] = "no known grade" + i + (j + 1);
 							continue;
 						}
 
 						// system.out.println("(460) c.courseName:" + c.courseName + " currentCourse:"
 						// +currentCourse);
 
-						if (c.lastLogin.contains("null")) {
-							table[i][j] = "No Login";
+						if (c.getData().contains("null")) {
+							table[i][j + 1] = "No Login";
 						}
 
-						if (c.courseName.equals(currentCourse)) {
-							table[i][j] = c.lastLogin;
+						if (c.getCourse().equals(currentCourse)) {
+							table[i][j + 1] = c.getData();
 							// system.out.println("AYYYYEEEE: " + c.lastLogin);
 							break;
 						}
@@ -372,14 +316,13 @@ public class CanvasMain {
 					}
 				}
 			}
-			// FIXME
-//		        for(String k: chosenIDs) {
-//		        	//system.out.println("ID: " + k + " was chosen");
-//		        }
+			
+
 
 			String[] chosenIDsArray = chosenIDs.toArray(new String[0]);
 
-			Map<String, List<gradeObj>> gradesMap = response.getGradesMap(chosenIDsArray); // FIXME probably the issue
+			Map<String, List<DataHolder>> gradesMap = response.getGradesMap(chosenIDsArray); 
+			
 
 			Object[][] table;
 
@@ -389,7 +332,7 @@ public class CanvasMain {
 			table[0][0] = "Students";
 
 			for (int i = 0; i < classList.size(); i++) {
-				table[0][i + 1] = classList.get(i); // FIXME changed from i = 1 to i+1 where needed
+				table[0][i + 1] = classList.get(i); 
 			}
 
 			// set row headers
@@ -398,31 +341,31 @@ public class CanvasMain {
 			}
 
 			String currentCourse, student;
-			List<gradeObj> studentCourses;
+			List<DataHolder> studentCourses;
 
 			for (int i = 1; i < students.size(); i++) {
 				student = students.get(i);
-				studentCourses = gradesMap.get(student); // FIXME issue?
+				studentCourses = gradesMap.get(student); 
 				if (studentCourses == null) {
 					continue;
 				}
-				for (int j = 1; j < classList.size(); j++) {
-					currentCourse = chosenIDs.get(j - 1);
-					for (gradeObj c : studentCourses) {
+				for (int j = 0; j < classList.size(); j++) {
+					currentCourse = chosenIDs.get(j);
+					for (DataHolder c : studentCourses) {
 						if (c == null) {
-							table[i][j] = "no known grade" + i + j;
+							table[i][j + 1] = "no known grade" + i + (j + 1);
 							continue;
 						}
 
 						// system.out.println("(460) c.courseName:" + c.courseName + " currentCourse:"
 						// +currentCourse);
 
-						if (c.grade.contains("null")) {
-							table[i][j] = "No Grade";
+						if (c.getData().contains("null")) {
+							table[i][j + 1] = "No Grade";
 						}
 
-						if (c.courseName.equals(currentCourse)) {
-							table[i][j] = c.grade;
+						if (c.getCourse().equals(currentCourse)) {
+							table[i][j + 1] = c.getData();
 							// system.out.println("AYYYYEEEE: " + c.grade);
 							break;
 						}
@@ -475,13 +418,65 @@ public class CanvasMain {
 		}
 	}
 
+	/**
+	 * 
+	 * @param course
+	 * @return list of students in the course
+	 */
+	public static List<String> getStudentList(List<String> courses) {
+		if (response == null) {
+			System.out.println("GOING RECURSIVE IN: getStudentList");
+			return getStudentList(courses);
+		}
+		String[] keySet;
+		Map<String, List<DataHolder>> studentMap;
+		System.out.println("Trying to get student list since none were included");
+		try {
+			List<String> courseIDs;
+			courseIDs = new ArrayList<>();
+
+			courses.stream().skip(0).forEach(c -> {
+				try {
+					courseIDs.add(response.toCourseID(c));
+					System.out.println("Added " + c + " to coursIDs");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+
+			studentMap = response.getUserMap(courseIDs.toArray(new String[0]), null, "");
+
+			System.out.println("Printing names");
+			for (String s : studentMap.keySet())
+				System.out.println(s);
+
+			keySet = studentMap.keySet().toArray(new String[0]);
+			Arrays.sort(keySet);
+			return Arrays.asList(keySet);
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+			throwErrorMessage(e.getMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * @return list of all possible students
+	 * 
+	 */
 	public static String[] getStudentList() {
 		if (response == null) {
 			return new String[0];
 		}
+		if (loadedStudentList != null) {
+			Arrays.sort(loadedStudentList);
+			return loadedStudentList;
+		}
 		String[] sorted = response.getStudentList();
 		Arrays.sort(sorted);
-		System.out.println("GET STUDENT LIST WAS CALLED IN CANVAS MAIN");
+		loadedStudentList = sorted;
 		return sorted;
 	}
 
@@ -513,48 +508,24 @@ public class CanvasMain {
 		updateAuth();
 	}
 
-	// FIXME add would you like to save preferences frame + underlying JSON
 	static void deleteOnExit() {
 		System.out.println("CLOSING");
 		File f;
-		String filePathString;
-		int loops;
-
 		try {
-			f = new File("studentList.txt");
-			if (f.exists())
-				f.delete();
-			System.out.println("Deleted studentList.txt");
-			loops = response.getCourseIDs().length;
-			for (int i = 0; i < loops; i++) {
-				filePathString = "getActivitiesMap_num_" + i + ".json";
-				f = new File(filePathString);
-				if (f.exists()) {
-					f.delete();
-					System.out.println("Deleted " + filePathString);
-				}
-			}
-			for (int i = 0; i < loops; i++) {
-				filePathString = "getGradesMap_num_" + i + ".json";
-				f = new File(filePathString);
-				if (f.exists()) {
-					f.delete();
-					System.out.println("Deleted " + filePathString);
-				}
-			}
+			clearCache();
 			f = new File("preferences.json");
 			if (f.exists())
 				f.delete();
-
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			throwErrorMessage(e.getMessage());
 			e.printStackTrace();
 		}
 	}
 
+
 	@SuppressWarnings({ "unchecked", "unused" })
 	static Map<String, List<String>[]> loadPreferences() {
+
 		Map<String, List<String>[]> loadedMap;
 		loadedMap = new HashMap<String, List<String>[]>();
 		org.json.simple.JSONObject groupObj;
@@ -562,56 +533,60 @@ public class CanvasMain {
 		org.json.simple.JSONArray studentsArray;
 		org.json.simple.JSONArray classesArray;
 		org.json.simple.JSONArray currentGroup;
+		org.json.simple.JSONArray mainArray;
+		String preferenceFileName;
+		File preferenceFile;
 		List<String> students;
 		List<String> classes;
 		List<String>[] groupList;
 
 		String currentKey;
+		String dataDirectory = System.getProperty("user.dir");
+		dataDirectory = dataDirectory + File.separator + "pulled_data" + File.separator;
+		preferenceFileName = dataDirectory + "preferences.json";
+		preferenceFile = new File(preferenceFileName);
+		DataGrabber tempResponse;
+
+		tempResponse = new DataGrabber("", "", "");
 
 		try {
-			File f = new File("preferences.json");
-			if (f.exists()) {
-				System.out.println("loading preferences");
-				JSONParser p = new JSONParser();
-				JSONObject jsonObj = (JSONObject) p.parse(new FileReader(f));
-				token = (String) jsonObj.get("token");
-				institution = (String) jsonObj.get("institution");
-				keysArray = (org.json.simple.JSONArray) jsonObj.get("keys array");
-				groupObj = (JSONObject) jsonObj.get("groups");
+			if (preferenceFile.exists()) {
+				mainArray = tempResponse.fileToJSONArray(preferenceFileName);
+				if (mainArray != null) {
+					JSONObject jsonObj = (JSONObject) mainArray.get(0);
+					token = (String) jsonObj.get("token");
+					institution = (String) jsonObj.get("institution");
+					keysArray = (org.json.simple.JSONArray) jsonObj.get("keys array");
+					groupObj = (JSONObject) jsonObj.get("groups");
 
-				for (int i = 0; i < keysArray.size(); i++) {
-					currentKey = (String) keysArray.get(i);
-					currentGroup = (org.json.simple.JSONArray) groupObj.get(currentKey);
-					classesArray = (org.json.simple.JSONArray) currentGroup.get(0);
-					studentsArray = (org.json.simple.JSONArray) currentGroup.get(1);
-					classes = new ArrayList<>();
-					students = new ArrayList<>();
+					for (int i = 0; i < keysArray.size(); i++) {
+						currentKey = (String) keysArray.get(i);
+						currentGroup = (org.json.simple.JSONArray) groupObj.get(currentKey);
+						classesArray = (org.json.simple.JSONArray) currentGroup.get(0);
+						studentsArray = (org.json.simple.JSONArray) currentGroup.get(1);
+						classes = new ArrayList<>();
+						students = new ArrayList<>();
 
-					for (int c = 0; c < classesArray.size(); c++) {
-						classes.add((String) classesArray.get(c));
+						for (int c = 0; c < classesArray.size(); c++) {
+							classes.add((String) classesArray.get(c));
+						}
+						for (int s = 0; s < studentsArray.size(); s++) {
+							students.add((String) studentsArray.get(s));
+						}
+
+						groupList = new List[2];
+						groupList[0] = classes;
+						groupList[1] = students;
+
+						loadedMap.put(currentKey, groupList);
 					}
-					for (int s = 0; s < studentsArray.size(); s++) {
-						students.add((String) studentsArray.get(s));
-					}
-
-					groupList = new List[2];
-					groupList[0] = classes;
-					groupList[1] = students;
-
-					loadedMap.put(currentKey, groupList);
-
 				}
-
-				setToken(token);
-				setInstitution(institution);
-
 				return loadedMap;
-			}
-
-			else {
+			} else {
 				WelcomeFrame wf = new WelcomeFrame();
 				return loadedMap;
 			}
+
 		} catch (Exception e) {
 			WelcomeFrame wf = new WelcomeFrame();
 			e.printStackTrace();
@@ -623,40 +598,13 @@ public class CanvasMain {
 	}
 
 	static void clearCache() {
-		File f;
-		String filePathString;
-		int loops;
-		try {
-			f = new File("preferences.json");
-			if (f.exists())
-				f.delete();
-			f = new File("studentList.txt");
-			if (f.exists())
-				f.delete();
-			System.out.println("Deleted studentList.txt");
-			loops = response.getCourseIDs().length;
-			for (int i = 0; i < loops; i++) {
-				filePathString = "getActivitiesMap_num_" + i + ".json";
-				f = new File(filePathString);
-				if (f.exists()) {
-					f.delete();
-					System.out.println("Deleted " + filePathString);
-				}
-			}
-			for (int i = 0; i < loops; i++) {
-				filePathString = "getGradesMap_num_" + i + ".json";
-				f = new File(filePathString);
-				if (f.exists()) {
-					f.delete();
-					System.out.println("Deleted " + filePathString);
-				}
-			}
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			throwErrorMessage(e.getMessage());
-			e.printStackTrace();
-		}
+		String dataDirectory = System.getProperty("user.dir");
+		dataDirectory = dataDirectory + File.separator + "pulled_data" + File.separator;
+		File cd = new File(dataDirectory);
+		Arrays.stream(cd.listFiles()).forEach(cf -> {
+			cf.delete();
+			System.out.println("deleted: " + cf);
+		});
 
 	}
 
@@ -665,7 +613,9 @@ public class CanvasMain {
 
 		org.json.JSONObject tempObj;
 		try {
-			File fw = new File("preferences.json");
+			String dataDirectory = System.getProperty("user.dir");
+			dataDirectory = dataDirectory + File.separator + "pulled_data" + File.separator;
+			File fw = new File(dataDirectory + "preferences.json");
 
 			org.json.JSONObject jo = new org.json.JSONObject();
 			jo.put("token", token);
@@ -696,6 +646,100 @@ public class CanvasMain {
 
 	static void throwErrorMessage(String message) {
 		throwErrorMessage(message, 0);
+	}
+
+	// initializes the progress bar
+	static void makeProgressBar(int i) {
+		progressFrame = new JFrame("Loading");
+		JPanel p = new JPanel();
+		progressBar = new JProgressBar(0, i);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
+		p.add(new JLabel("Gathering Data: "));
+		p.add(progressBar);
+		progressBar.setStringPainted(true);
+		progressFrame.add(p);
+		progressFrame.pack();
+		progressFrame.setSize(200, 100);
+		progressFrame.setLocationRelativeTo(null);
+		progressFrame.setVisible(true);
+		progressFrame.setAlwaysOnTop(true);
+	}
+
+	static void updateBar(int incrementAmount) {
+		int current = progressBar.getValue();
+		progressBar.setValue(current + incrementAmount);
+		progressBar.repaint();
+		progressFrame.repaint();
+		System.out.println("Updated to " + (current + incrementAmount));
+
+	}
+
+	static void frontLoadData() {
+		BarWorker bw = new BarWorker();
+		System.out.println("Sending to execute");
+		bw.execute();
+	}
+
+	static class BarWorker extends SwingWorker<Integer, Integer> {
+
+		@Override
+		protected Integer doInBackground() throws Exception {
+			System.out.println("FRONTLOADING DATA");
+			try {
+
+				String[] courses = response.getCourseIDs();
+
+				makeProgressBar(100);
+
+				publish(23);
+				response.getActivitiesMap(courses);
+
+				publish(25);
+				response.getGradesMap(courses);
+
+				publish(27);
+				getStudentList();
+
+				publish(24);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return 0;
+		}
+
+		@Override
+		protected void process(List<Integer> chunks) {
+			for (Integer d : chunks) {
+				System.out.println(d);
+				updateBar(d);
+			}
+		}
+
+		@Override
+		protected void done() {
+			progressFrame.setVisible(false);
+			progressFrame.dispose();
+			System.out.println("Done");
+		}
+	}
+
+	static void runBarUpdates() {
+
+		new Thread(() -> {
+			for (int i = 0; i < 100; i++) {
+				updateBar(1);
+				System.out.println("set value to: " + i);
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		}).start();
+
 	}
 
 }
