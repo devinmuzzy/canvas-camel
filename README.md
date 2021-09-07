@@ -10,8 +10,8 @@ Compile the file into a .jar and run it on your computer using the latest versio
 
 ## FAQ
  Q:  What is a token and how do I get one?
-\n A:  https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273
+ A:  https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273
   
  Q: What is "yourinstitution" ? 
-\n A: Replace "yourinstitution" with the name that comes before canvas.com when you log onto canvas in a web browser.
+ A: Replace "yourinstitution" with the name that comes before canvas.com when you log onto canvas in a web browser.
   
