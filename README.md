@@ -8,6 +8,16 @@ This application allows you to manage the grades and activity of your students i
 Compile the file into a .jar and run it on your computer using the latest version of Java.
 
 
+## Example
+<img width="691" alt="Screen Shot 2021-09-08 at 4 24 52 PM" src="https://user-images.githubusercontent.com/68883649/132751846-a130ed5f-011a-4610-9cb6-996ebed22a7d.png">
+<img width="766" alt="Screen Shot 2021-09-08 at 4 25 57 PM" src="https://user-images.githubusercontent.com/68883649/132751854-463ff521-b954-47ba-81a8-8bb2d14908bd.png">
+<img width="766" alt="Screen Shot 2021-09-08 at 4 26 46 PM" src="https://user-images.githubusercontent.com/68883649/132751860-79170382-eb9c-4c8e-aa6f-9eb6b8d23267.png">
+<img width="687" alt="Screen Shot 2021-09-08 at 4 27 35 PM" src="https://user-images.githubusercontent.com/68883649/132751869-afeea749-8629-442a-9bd5-48920bbb71c4.png">
+<img width="686" alt="Screen Shot 2021-09-08 at 4 31 59 PM" src="https://user-images.githubusercontent.com/68883649/132751877-3479f441-b976-44df-b7fb-5a115074264d.png">
+<img width="686" alt="Screen Shot 2021-09-08 at 4 34 59 PM" src="https://user-images.githubusercontent.com/68883649/132751894-cd03cde3-cc4d-4e57-adb9-e753332a2231.png">
+<img width="686" alt="Screen Shot 2021-09-08 at 4 37 54 PM" src="https://user-images.githubusercontent.com/68883649/132751898-f07c4a30-b5b0-4e49-91c7-76b1861c7d0d.png">
+
+
 ## FAQ
  Q:  What is a token and how do I get one?
  A:  https://community.canvaslms.com/t5/Student-Guide/How-do-I-manage-API-access-tokens-as-a-student/ta-p/273
